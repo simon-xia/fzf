@@ -50,19 +50,23 @@ func (r *Reader) fin(success bool) {
 }
 
 // ReadSource reads data from the default command or from standard input
-func (r *Reader) ReadSource() {
+func (r *Reader) ReadSource(reader io.Reader) {
 	r.startEventPoller()
 	var success bool
-	if util.IsTty() {
-		cmd := os.Getenv("FZF_DEFAULT_COMMAND")
-		if len(cmd) == 0 {
-			// The default command for *nix requires bash
-			success = r.readFromCommand("bash", defaultCommand)
+	if reader != nil {
+		success = r.readFromReader(reader)
+	}else {
+		if util.IsTty() {
+			cmd := os.Getenv("FZF_DEFAULT_COMMAND")
+			if len(cmd) == 0 {
+				// The default command for *nix requires bash
+				success = r.readFromCommand("bash", defaultCommand)
+			} else {
+				success = r.readFromCommand("sh", cmd)
+			}
 		} else {
-			success = r.readFromCommand("sh", cmd)
+			success = r.readFromStdin()
 		}
-	} else {
-		success = r.readFromStdin()
 	}
 	r.fin(success)
 }
@@ -95,6 +99,11 @@ func (r *Reader) feed(src io.Reader) {
 			break
 		}
 	}
+}
+
+func (r *Reader) readFromReader(reader io.Reader) bool {
+	r.feed(reader)
+	return true
 }
 
 func (r *Reader) readFromStdin() bool {

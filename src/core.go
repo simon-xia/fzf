@@ -30,7 +30,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/junegunn/fzf/src/util"
+	"github.com/simon-xia/fzf/src/util"
 )
 
 /*
@@ -121,7 +121,7 @@ func Run(opts *Options, revision string) {
 		reader := NewReader(func(data []byte) bool {
 			return chunkList.Push(data)
 		}, eventBox, opts.ReadZero)
-		go reader.ReadSource()
+		go reader.ReadSource(opts.Reader)
 	}
 
 	// Matcher
@@ -164,7 +164,7 @@ func Run(opts *Options, revision string) {
 					}
 					return false
 				}, eventBox, opts.ReadZero)
-			reader.ReadSource()
+			reader.ReadSource(opts.Reader)
 		} else {
 			eventBox.Unwatch(EvtReadNew)
 			eventBox.WaitFor(EvtReadFin)
