@@ -1388,7 +1388,8 @@ func (t *Terminal) killPreview(code int) {
 	case t.killChan <- code:
 	default:
 		if code != exitCancel {
-			os.Exit(code)
+			//os.Exit(code)
+			t.eventBox.Set(EvtExit, "exit")
 		}
 	}
 }
@@ -1492,7 +1493,9 @@ func (t *Terminal) Loop() {
 						case code := <-t.killChan:
 							if code != exitCancel {
 								util.KillCommand(cmd)
-								os.Exit(code)
+								//os.Exit(code)
+								t.eventBox.Set(EvtExit, "exit")
+								return
 							} else {
 								select {
 								case <-time.After(previewCancelWait):
@@ -1580,6 +1583,7 @@ func (t *Terminal) Loop() {
 							}
 							return exitNoMatch
 						})
+						return
 					case reqPreviewDisplay:
 						t.previewer.text = value.(string)
 						t.previewer.lines = strings.Count(t.previewer.text, "\n")

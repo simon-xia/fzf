@@ -179,7 +179,8 @@ func Run(opts *Options, revision string) {
 			}
 		}
 		if found {
-			os.Exit(exitOk)
+			//os.Exit(exitOk)
+			return
 		}
 		os.Exit(exitNoMatch)
 	}
@@ -205,6 +206,10 @@ func Run(opts *Options, revision string) {
 	reading := true
 	ticks := 0
 	eventBox.Watch(EvtReadNew)
+
+	exitChan := make(chan struct {}, 1)
+
+MainLoop:
 	for {
 		delay := true
 		ticks++
@@ -262,7 +267,8 @@ func Run(opts *Options, revision string) {
 										opts.Printer(val.Get(i).item.AsString(opts.Ansi))
 									}
 									if count > 0 {
-										os.Exit(exitOk)
+										//os.Exit(exitOk)
+										return
 									}
 									os.Exit(exitNoMatch)
 								}
@@ -272,15 +278,23 @@ func Run(opts *Options, revision string) {
 						}
 						terminal.UpdateList(val)
 					}
+				case EvtExit:
+					exitChan <- struct{}{}
 				}
 			}
 			events.Clear()
 		})
-		if delay && reading {
-			dur := util.DurWithin(
-				time.Duration(ticks)*coordinatorDelayStep,
-				0, coordinatorDelayMax)
-			time.Sleep(dur)
+
+		select {
+		case <-exitChan:
+			break MainLoop
+		default:
+			if delay && reading {
+				dur := util.DurWithin(
+					time.Duration(ticks)*coordinatorDelayStep,
+					0, coordinatorDelayMax)
+				time.Sleep(dur)
+			}
 		}
 	}
 }
