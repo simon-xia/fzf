@@ -2,15 +2,16 @@ package fzf
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
-	"github.com/junegunn/fzf/src/algo"
-	"github.com/junegunn/fzf/src/tui"
-	"github.com/junegunn/fzf/src/util"
+	"github.com/simon-xia/fzf/src/algo"
+	"github.com/simon-xia/fzf/src/tui"
+	"github.com/simon-xia/fzf/src/util"
 
 	"github.com/mattn/go-shellwords"
 )
@@ -198,9 +199,10 @@ type Options struct {
 	Tabstop     int
 	ClearOnExit bool
 	Version     bool
+	Reader 		io.Reader
 }
 
-func defaultOptions() *Options {
+func DefaultOptions() *Options {
 	return &Options{
 		Fuzzy:       true,
 		FuzzyAlgo:   algo.FuzzyMatchV2,
@@ -246,7 +248,16 @@ func defaultOptions() *Options {
 		Margin:      defaultMargin(),
 		Tabstop:     8,
 		ClearOnExit: true,
-		Version:     false}
+		Version:     false,
+		Reader: 	 nil}
+}
+
+func (o *Options) SetHeight(s string) {
+	o.Height = parseHeight(s)
+}
+
+func (o *Options) SetLayoutReverse() {
+	o.Layout = layoutReverse
 }
 
 func help(code int) {
@@ -1247,7 +1258,7 @@ func parseOptions(opts *Options, allArgs []string) {
 	}
 }
 
-func postProcessOptions(opts *Options) {
+func PostProcessOptions(opts *Options) {
 	if util.IsWindows() && opts.Height.size > 0 {
 		errorExit("--height option is currently not supported on Windows")
 	}
@@ -1287,7 +1298,7 @@ func postProcessOptions(opts *Options) {
 
 // ParseOptions parses command-line options
 func ParseOptions() *Options {
-	opts := defaultOptions()
+	opts := DefaultOptions()
 
 	// Options from Env var
 	words, _ := shellwords.Parse(os.Getenv("FZF_DEFAULT_OPTS"))
@@ -1298,6 +1309,6 @@ func ParseOptions() *Options {
 	// Options from command-line arguments
 	parseOptions(opts, os.Args[1:])
 
-	postProcessOptions(opts)
+	PostProcessOptions(opts)
 	return opts
 }
