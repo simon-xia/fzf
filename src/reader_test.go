@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/junegunn/fzf/src/util"
+	"github.com/simon-xia/fzf/src/util"
 )
 
 func TestReadFromCommand(t *testing.T) {

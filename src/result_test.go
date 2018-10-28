@@ -7,8 +7,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/junegunn/fzf/src/tui"
-	"github.com/junegunn/fzf/src/util"
+	"github.com/simon-xia/fzf/src/tui"
+	"github.com/simon-xia/fzf/src/util"
 )
 
 func withIndex(i *Item, index int) *Item {
